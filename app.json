@@ -59,8 +59,8 @@
     
     "SUDO_USERS": {
       "description": "Other Admins' IDs (optional)",
-      "value": "",
-      "required": false
+      "value": "5685025814",
+      "required": true 
     },
     "CHANNEL_ID": {
       "description": "Enter Channel ID (-100) and make bot admin there",
