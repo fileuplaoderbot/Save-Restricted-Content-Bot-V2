@@ -104,18 +104,7 @@ async def upload_media(sender, target_chat_id, file, caption, edit, topic_id):
                     progress_args=("╭─────────────────────╮\n│      **__Pyro Uploader__**\n├─────────────────────", edit, time.time())
                 )
                 await dm.copy(LOG_GROUP)
-            elif file.split('.')[-1].lower() in document_formats:
-                dm = await app.send_document(
-                    chat_id=target_chat_id,
-                    document=file,
-                    caption=caption,
-                    thumb=thumb_path,
-                    reply_to_message_id=topic_id,
-                    progress=progress_bar,
-                    parse_mode=ParseMode.MARKDOWN,
-                    progress_args=("╭─────────────────────╮\n│      **__Pyro Uploader__**\n├─────────────────────", edit, time.time())
-                )
-                await dm.copy(LOG_GROUP)
+                
             elif file.split('.')[-1].lower() in image_formats:
                 dm = await app.send_photo(
                     chat_id=target_chat_id,
@@ -126,6 +115,18 @@ async def upload_media(sender, target_chat_id, file, caption, edit, topic_id):
                     reply_to_message_id=topic_id,
                     progress_args=("╭─────────────────────╮\n│      **__Pyro Uploader__**\n├─────────────────────", edit, time.time())
                 )
+                await dm.copy(LOG_GROUP)
+            else:
+                dm = await app.send_document(
+                    chat_id=target_chat_id,
+                    document=file,
+                    caption=caption,
+                    thumb=thumb_path,
+                    reply_to_message_id=topic_id,
+                    progress=progress_bar,
+                    parse_mode=ParseMode.MARKDOWN,
+                    progress_args=("╭─────────────────────╮\n│      **__Pyro Uploader__**\n├─────────────────────", edit, time.time())
+                )
                 await asyncio.sleep(2)
                 await dm.copy(LOG_GROUP)
 
@@ -133,13 +134,12 @@ async def upload_media(sender, target_chat_id, file, caption, edit, topic_id):
         elif upload_method == "Telethon":
             await edit.delete()
             progress_message = await gf.send_message(sender, "**__Uploading...__**")
-            start_time = time.time()
             caption = await format_caption_to_html(caption)
             uploaded = await fast_upload(
                 gf, file,
                 reply=progress_message,
                 name=None,
-                progress_bar_function=lambda done, total: progress_callback(done, total, start_time)
+                progress_bar_function=lambda done, total: progress_callback(done, total, sender)
             )
             await progress_message.delete()
 
@@ -192,6 +192,7 @@ async def get_msg(userbot, sender, edit_id, msg_link, i, message):
             parts = msg_link.split("/")
             if 't.me/b/' in msg_link:
                 chat = parts[-2]
+                msg_id = int(parts[-1]) + i # fixed bot problem 
             else:
                 chat = int('-100' + parts[parts.index('c') + 1])
                 msg_id = int(parts[-1]) + i
@@ -301,7 +302,7 @@ async def get_msg(userbot, sender, edit_id, msg_link, i, message):
     except (ChannelBanned, ChannelInvalid, ChannelPrivate, ChatIdInvalid, ChatInvalid):
         await app.edit_message_text(sender, edit_id, "Have you joined the channel?")
     except Exception as e:
-        await app.edit_message_text(sender, edit_id, f"Failed to save: `{msg_link}`\n\nError: {str(e)}")
+        # await app.edit_message_text(sender, edit_id, f"Failed to save: `{msg_link}`\n\nError: {str(e)}")
         print(f"Error: {e}")
     finally:
         # Clean up
@@ -451,9 +452,11 @@ async def copy_message_with_chat_id(app, userbot, sender, chat_id, message_id, e
                 await edit.edit("Unsupported media type.")
 
     except Exception as e:
-        error_message = f"Error occurred while processing message: {str(e)}"
-        await app.send_message(sender, error_message)
-        await app.send_message(sender, f"Make Bot admin in your Channel - {target_chat_id} and restart the process after /cancel")
+        print(f"Error : {e}")
+        pass
+        #error_message = f"Error occurred while processing message: {str(e)}"
+        # await app.send_message(sender, error_message)
+        # await app.send_message(sender, f"Make Bot admin in your Channel - {target_chat_id} and restart the process after /cancel")
 
     finally:
         if file and os.path.exists(file):
@@ -461,14 +464,19 @@ async def copy_message_with_chat_id(app, userbot, sender, chat_id, message_id, e
 
 
 async def send_media_message(app, target_chat_id, msg, caption, topic_id):
-    if msg.video:
-        return await app.send_video(target_chat_id, msg.video.file_id, caption=caption, reply_to_message_id=topic_id)
-    if msg.document:
-        return await app.send_document(target_chat_id, msg.document.file_id, caption=caption, reply_to_message_id=topic_id)
-    if msg.photo:
-        return await app.send_photo(target_chat_id, msg.photo.file_id, caption=caption, reply_to_message_id=topic_id)
+    try:
+        if msg.video:
+            return await app.send_video(target_chat_id, msg.video.file_id, caption=caption, reply_to_message_id=topic_id)
+        if msg.document:
+            return await app.send_document(target_chat_id, msg.document.file_id, caption=caption, reply_to_message_id=topic_id)
+        if msg.photo:
+            return await app.send_photo(target_chat_id, msg.photo.file_id, caption=caption, reply_to_message_id=topic_id)
+    except Exception as e:
+        print(f"Error while sending media: {e}")
+    
+    # Fallback to copy_message in case of any exceptions
     return await app.copy_message(target_chat_id, msg.chat.id, msg.id, reply_to_message_id=topic_id)
-
+    
 
 def format_caption(original_caption, sender, custom_caption):
     delete_words = load_delete_words(sender)
