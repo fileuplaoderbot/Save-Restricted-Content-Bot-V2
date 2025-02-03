@@ -75,7 +75,7 @@ async def token_handler(client, message):
     if len(message.command) <= 1:
         image_url = "https://envs.sh/gWw.jpg"
         join_button = InlineKeyboardButton("Join Channel", url="https://t.me/ShinchanDubber")
-        premium = InlineKeyboardButton("Get Premium", url="https://t.me/MovieHorn_ContactRobot"")   
+        premium = InlineKeyboardButton("Get Premium", url="https://t.me/MovieHorn_ContactRobot")   
         keyboard = InlineKeyboardMarkup([
             [join_button],   
             [premium]    
