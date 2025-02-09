@@ -3,6 +3,16 @@
 
 from os import getenv
 
+# VPS --- FILL COOKIES 🍪 in """ ... """ 
+
+INST_COOKIES = """
+# wtite up here insta cookies
+"""
+
+YTUB_COOKIES = """
+# write here yt cookies
+"""
+
 API_ID = int(getenv("API_ID", ""))
 API_HASH = getenv("API_HASH", "")
 BOT_TOKEN = getenv("BOT_TOKEN", "")
@@ -15,5 +25,5 @@ PREMIUM_LIMIT = int(getenv("PREMIUM_LIMIT", "500"))
 WEBSITE_URL = getenv("WEBSITE_URL", "omegalinks.in")
 AD_API = getenv("AD_API", "2919fa4e63a974e6708d8870c759728dcec1d315")
 STRING = getenv("STRING", None)
-YT_COOKIES = getenv("YT_COOKIES", None)
-INSTA_COOKIES = getenv("INSTA_COOKIES", None)
+YT_COOKIES = getenv("YT_COOKIES", YTUB_COOKIES)
+INSTA_COOKIES = getenv("INSTA_COOKIES", INST_COOKIES)
